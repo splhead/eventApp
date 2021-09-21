@@ -24,7 +24,7 @@ class UserController extends StatefulWidget {
   }
 
   @override
-  _UserControllerState createState() => _UserControllerState.instance;
+  _UserControllerState createState() => _UserControllerState();
 }
 
 class _UserControllerState extends State<UserController> {
@@ -32,12 +32,14 @@ class _UserControllerState extends State<UserController> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   DatabaseReference databaseReference = FirebaseDatabase.instance.reference();
 
-  static late _UserControllerState _instance;
+  static _UserControllerState? _instance;
 
   _UserControllerState._() {}
 
-  static _UserControllerState get instance =>
-      _instance = _instance ?? _UserControllerState._();
+  factory _UserControllerState() =>  _instance ??= _UserControllerState._();
+
+  // static _UserControllerState get instance =>
+  //     _instance ??= _UserControllerState._();
 
   @override
   Widget build(BuildContext context) {

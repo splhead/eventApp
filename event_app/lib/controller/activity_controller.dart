@@ -9,17 +9,19 @@ class ActivityController extends StatefulWidget {
   }
 
   @override
-  _ActivityControllerState createState() => _ActivityControllerState.instance;
+  _ActivityControllerState createState() => _ActivityControllerState();
 }
 
 class _ActivityControllerState extends State<ActivityController> {
 
   FirebaseService firebaseService = FirebaseService();
-  static late _ActivityControllerState _instance;
+  static _ActivityControllerState? _instance;
 
   _ActivityControllerState._() {}
 
-  static _ActivityControllerState get instance => _instance ?? _ActivityControllerState._();
+  factory _ActivityControllerState() => _instance ??= _ActivityControllerState._();
+
+  // static _ActivityControllerState get instance => _instance ?? _ActivityControllerState._();
 
   @override
   Widget build(BuildContext context) {
