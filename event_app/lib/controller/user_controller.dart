@@ -34,7 +34,7 @@ class _UserControllerState extends State<UserController> {
 
   static _UserControllerState? _instance;
 
-  _UserControllerState._() {}
+  _UserControllerState._();
 
   factory _UserControllerState() =>  _instance ??= _UserControllerState._();
 
@@ -53,12 +53,12 @@ class _UserControllerState extends State<UserController> {
       // Usuario firebase
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: user.email, password: user.password);
-      final User fUser = result.user;
+      final User? fUser = result.user;
 
       // dados para atualizar o usuário
-      await fUser.updateProfile(displayName: user.name);
+      await fUser?.updateDisplayName(user.name);
 
-      firebaseUserUid = fUser.uid;
+      firebaseUserUid = fUser!.uid;
       DocumentReference refUser = FirebaseFirestore.instance.collection("user")
           .doc(firebaseUserUid);
       refUser.set({
@@ -69,7 +69,7 @@ class _UserControllerState extends State<UserController> {
 
       formKey.currentState?.save();
       formKey.currentState?.reset();
-      
+
       return ApiResponse.ok(msg: 'Usuário cadastrado com sucesso');
     } catch (error) {
       print(error);

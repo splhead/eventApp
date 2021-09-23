@@ -1,4 +1,5 @@
 import 'package:event_app/service/firebase_service.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class ActivityController extends StatefulWidget {
@@ -6,6 +7,10 @@ class ActivityController extends StatefulWidget {
 
   void addActivity(String table, Object data) {
     createState()._addActivity(table, data);
+  }
+
+  DatabaseReference getAllActivities(String table) {
+    return createState()._getAllActivities(table);
   }
 
   @override
@@ -17,7 +22,7 @@ class _ActivityControllerState extends State<ActivityController> {
   FirebaseService firebaseService = FirebaseService();
   static _ActivityControllerState? _instance;
 
-  _ActivityControllerState._() {}
+  _ActivityControllerState._();
 
   factory _ActivityControllerState() => _instance ??= _ActivityControllerState._();
 
@@ -30,5 +35,9 @@ class _ActivityControllerState extends State<ActivityController> {
 
   void _addActivity(String table, Object data) {
     firebaseService.saveDataRealTime(table, data);
+  }
+
+  DatabaseReference _getAllActivities(String table) {
+    return firebaseService.getDataRealTime(table);
   }
 }

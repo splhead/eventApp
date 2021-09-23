@@ -1,7 +1,9 @@
 import 'package:firebase_database/firebase_database.dart';
+// mudei o nome da classe para não dar conflito com o do firebase
+// não consegui fazer um alias
 
 class MyUser {
-  late String key;
+  String? key;
   late String name;
   late String email;
   late String password;

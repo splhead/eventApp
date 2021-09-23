@@ -1,7 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 
 class Activity {
-  late String key;
+  String? key;
   late String title;
   late String speaker;
   late String schedule;

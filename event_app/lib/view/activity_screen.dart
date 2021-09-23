@@ -1,6 +1,7 @@
 import 'package:event_app/controller/activity_controller.dart';
-import 'package:event_app/controller/user_controller.dart';
 import 'package:event_app/model/activity.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 
 import 'menu.dart';
@@ -22,35 +23,34 @@ class _ActivityScreenState extends State<ActivityScreen> {
   final GlobalKey<FormFieldState> formState = GlobalKey<FormFieldState>();
   final globalKey = GlobalKey<ScaffoldState>();
 
+  List<Activity> atividades = <Activity>[];
+  late DatabaseReference databaseReference;
+
+  @override
+  void initState() {
+    super.initState();
+    databaseReference = ActivityController().getAllActivities('activity');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: globalKey,
       appBar: AppBar(
         title: Text(
-          'Atividades',
+          'ATIVIDADES',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.deepPurple,
       ),
-      body: Container(
-        child: ListView(
-          children: [
-            Card(
-              child: ListTile(
-                leading: IconButton(
-                  icon: Icon(Icons.check),
-                  onPressed: () {},
-                ),
-                title: Text('Atividade 1'),
-                trailing: IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () {},
-                ),
-              ),
-            )
-          ],
-        ),
+      body: Column(
+        children: [
+          Flexible(child: Container(width: 0, height: 0)),
+          Flexible(
+              child: atividades.isNotEmpty
+                  ? _listagem(context)
+                  : Center(child: Text('Não há atividades cadastradas!')))
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
@@ -63,11 +63,30 @@ class _ActivityScreenState extends State<ActivityScreen> {
     );
   }
 
+  Widget _listagem(BuildContext context) {
+    return FirebaseAnimatedList(
+        query: databaseReference,
+        itemBuilder:
+            (_, DataSnapshot snapshot, Animation<double> animation, int index) {
+          return Card(
+            child: ListTile(
+              leading: atividades[index].confirmed
+                  ? Icon(Icons.check)
+                  : Icon(Icons.maximize),
+              title: Text(atividades[index].title),
+              trailing: IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () {},
+              ),
+            ),
+          );
+        });
+  }
+
   void _cadastrarAtividade() {
     showDialog(
         context: context,
-        builder: (BuildContext context) =>
-            Form(
+        builder: (BuildContext context) => Form(
               key: formKey,
               child: SimpleDialog(
                 title: Text('Atividade'),
@@ -77,7 +96,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     child: TextFormField(
                       controller: _palestra,
                       decoration:
-                      InputDecoration(hintText: "Título da palestra"),
+                          InputDecoration(hintText: "Título da palestra"),
                       validator: (val) => val ?? null,
                     ),
                   ),
@@ -146,7 +165,6 @@ class _ActivityScreenState extends State<ActivityScreen> {
             _palestra.text, _palestrante.text, _horario.text, confirmada);
 
         ActivityController().addActivity("activity", activity);
-
 
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Atividade cadastrada com sucesso.')));

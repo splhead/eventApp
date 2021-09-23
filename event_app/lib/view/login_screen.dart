@@ -80,6 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     child: Text(
                       'Cadastrar',
+                      style: TextStyle(color: Colors.black),
                     ),
                   )),
                 ],
