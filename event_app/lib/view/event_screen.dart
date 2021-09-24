@@ -1,3 +1,8 @@
+import 'package:event_app/controller/activity_controller.dart';
+import 'package:event_app/model/activity.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'menu.dart';
@@ -11,16 +16,25 @@ class EventScreen extends StatefulWidget {
 
 class _EventScreenState extends State<EventScreen> {
   List<dynamic> atividades = [];
-  Map<String, String> atividade = {
-    "palestrante": "Paulo dos Santos",
-    "titulo": "A informação na nação brasileira",
-    "horario": "10:15h às 11:15h"
-  };
+  late DatabaseReference databaseReference;
+
+  @override
+  void initState() {
+    super.initState();
+    databaseReference = ActivityController().getAllActivities('activity');
+    databaseReference.onChildAdded.listen(_verificaAtividade);
+  }
+
+  void _verificaAtividade(Event event) {
+    setState(() {
+      Activity atividade = Activity.fromSnapShot(event.snapshot);
+      atividade.setKey(event.snapshot.key);
+      atividades.add(atividade);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    atividades.add(atividade);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -54,42 +68,30 @@ class _EventScreenState extends State<EventScreen> {
   }
 
   _listagem(BuildContext context) {
-    return Column(
-      children: [
-        Card(
-            child: Row(children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.black26,
-              radius: 25,
-              child: Text(
-                'P',
-                style: TextStyle(fontSize: 30, color: Colors.white),
+    return FirebaseAnimatedList(
+        query: databaseReference,
+        itemBuilder:
+            (_, DataSnapshot snapshot, Animation<double> animation, int index) {
+          return Card(
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Colors.black26,
+                radius: 25,
+                child: Text(
+                  '${atividades[index].speaker.substring(0, 1)}',
+                  style: TextStyle(fontSize: 30, color: Colors.white),
+                ),
               ),
+              title: Text(
+                "${atividades[index].title}",
+                style: TextStyle(fontWeight: FontWeight.w400,
+                    color: atividades[index].confirmed ? Colors.deepPurple: Colors.black ),
+              ),
+              subtitle: Text("${atividades[index].speaker} \n"
+                  "${atividades[index].schedule}"),
+              trailing: atividades[index].confirmed ? Icon(Icons.check) : Icon(Icons.maximize),
             ),
-          ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('${atividades[0]['titulo']}',
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8.0, 2, 2, 2),
-                    child: Text('${atividades[0]['palestrante']}'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8.0, 2, 2, 2),
-                    child: Text('${atividades[0]['horario']}'),
-                  ),
-                ],
-              )
-        ])),
-      ],
-    );
+          );
+        });
   }
 }

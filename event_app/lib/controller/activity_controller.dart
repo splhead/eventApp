@@ -13,6 +13,10 @@ class ActivityController extends StatefulWidget {
     return createState()._getAllActivities(table);
   }
 
+  void deleteActivity(String table, String? key) {
+    createState()._deleteActivity(table, key);
+  }
+
   @override
   _ActivityControllerState createState() => _ActivityControllerState();
 }
@@ -39,5 +43,9 @@ class _ActivityControllerState extends State<ActivityController> {
 
   DatabaseReference _getAllActivities(String table) {
     return firebaseService.getDataRealTime(table);
+  }
+
+  void _deleteActivity(String table, String? key) {
+    firebaseService.deleteDataRealTime(table, key);
   }
 }

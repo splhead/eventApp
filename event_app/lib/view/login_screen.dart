@@ -98,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (formKey.currentState!.validate()) {
       ApiResponse response = await UserController().login(user, formKey);
 
-      if (response.msg != null) {
+      if (response.ok) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(response.msg!)));
 

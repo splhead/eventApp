@@ -32,7 +32,7 @@ class Activity {
     confirmed = json['confirmed'];
   }
 
-  void setKey(String value) {
+  void setKey(String? value) {
     key = value;
   }
 }

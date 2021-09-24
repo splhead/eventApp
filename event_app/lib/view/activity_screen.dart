@@ -30,6 +30,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
   void initState() {
     super.initState();
     databaseReference = ActivityController().getAllActivities('activity');
+    databaseReference.onChildAdded.listen(_verificaAtividade);
+    databaseReference.onChildChanged.listen((event) {});
+  }
+
+  void _verificaAtividade(Event event) {
+    setState(() {
+      Activity atividade = Activity.fromSnapShot(event.snapshot);
+      atividade.setKey(event.snapshot.key);
+      atividades.add(atividade);
+    });
   }
 
   @override
@@ -49,7 +59,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
           Flexible(
               child: atividades.isNotEmpty
                   ? _listagem(context)
-                  : Center(child: Text('Não há atividades cadastradas!')))
+                  : Center(
+                      child: Container(
+                          child: Text('Não há atividades cadastradas!'))))
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -73,14 +85,42 @@ class _ActivityScreenState extends State<ActivityScreen> {
               leading: atividades[index].confirmed
                   ? Icon(Icons.check)
                   : Icon(Icons.maximize),
-              title: Text(atividades[index].title),
+              title: Text("${atividades[index].title}"),
+              subtitle: Text("${atividades[index].speaker} \n"
+                  "${atividades[index].schedule}"),
               trailing: IconButton(
                 icon: Icon(Icons.delete),
-                onPressed: () {},
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return _alertaDelete(context, atividades[index]);
+                      });
+                },
               ),
             ),
           );
         });
+  }
+
+  Widget _alertaDelete(BuildContext context, Activity atividade) {
+    return AlertDialog(
+      title: Text('Remover atividade'),
+      content: Text('Você deseja remover a atividade "${atividade.title}" ?'),
+      actions: [
+        TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancelar', style: TextStyle(color: Colors.black54))),
+        TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _deleteAtividade(context, atividade.key);
+            },
+            child: Text('Ok', style: TextStyle(color: Colors.deepPurple),))
+      ],
+    );
   }
 
   void _cadastrarAtividade() {
@@ -97,7 +137,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       controller: _palestra,
                       decoration:
                           InputDecoration(hintText: "Título da palestra"),
-                      validator: (val) => val ?? null,
+                      validator:  (val) => val == "" ? val : null,
                     ),
                   ),
                   Padding(
@@ -105,7 +145,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     child: TextFormField(
                       decoration: InputDecoration(hintText: "Palestrante"),
                       controller: _palestrante,
-                      validator: (val) => val ?? null,
+                      validator:  (val) => val == "" ? val : null,
                     ),
                   ),
                   Padding(
@@ -113,7 +153,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     child: TextFormField(
                       decoration: InputDecoration(hintText: "Horário"),
                       controller: _horario,
-                      validator: (val) => val ?? null,
+                      validator:  (val) => val == "" ? val : null,
                     ),
                   ),
                   Padding(
@@ -179,6 +219,17 @@ class _ActivityScreenState extends State<ActivityScreen> {
       print(error);
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Não foi possível cadastrar a atividade.')));
+    }
+  }
+
+  void _deleteAtividade(BuildContext context, String? key) {
+    try {
+      ActivityController().deleteActivity('activity', key);
+      Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ActivityScreen()));
+    } catch(error) {
+      print(error);
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível remover a atividade.')));
     }
   }
 }
